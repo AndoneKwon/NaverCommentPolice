@@ -1,0 +1,6 @@
+rootProject.name = 'module'
+
+include 'service-analysis'
+include 'service-auth'
+include 'service-gateway'
+

@@ -1,0 +1,13 @@
+server:
+  port: 8010
+
+zuul:
+  routes:
+    auth:
+      path: /login/**
+      url: http://127.0.0.1:8081/
+      sensitiveHeaders: Cookie,Set-Cookie
+      stripPrefix: false
+    service-analysis:
+      path: /analysis/**
+      url: http://127.0.0.1:8082/
