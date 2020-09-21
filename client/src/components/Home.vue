@@ -29,9 +29,9 @@
         >
             {{ errorMessage }}
         </v-alert>
-        <v-row class="mt-10">
+        <v-container fluid class="mt-10 text-center align-center">
             <h3 v-if="results.length">Results Length : {{ results.length }}</h3>
-        </v-row>
+        </v-container>
         <v-data-table
             v-if="results.length"
             :headers="headers"
@@ -76,11 +76,20 @@ export default {
             this.errorMessage = '';
 
             const url = 'http://117.17.196.142:8888/search'; 
-            const data = this.query;
+            const data = { query: this.query };
+            const headers = {
+                'accept': 'application/json',
+                'content-type': 'application/json;charset=UTF-8',
+            };
 
-            axios.post(url, data)
+            axios.post(url, data, headers)
             .then(res => {
-                console.log(res);
+                if (res.data.length === 0) {
+                    this.error = true;
+                    this.errorMessage = '검색 결과가 존재하지 않습니다.';
+                    return;
+                }
+                this.results = res.data;
             })
             .catch(err => {
                 console.log(err);
