@@ -1,21 +1,42 @@
 <template>
     <v-container fluid class="text-center align-center">
         <h2>ElasticSearch 기술을 활용한 네이버 댓글 수사대</h2>
-        <v-row class="my-10 px-3">
+        <v-row class="mt-10 px-3">
             <v-text-field
-                v-model="input"
+                v-model="query"
                 outlined
                 label="유사도를 판정할 댓글을 입력하세요"
+                @keyup.enter="submitQuery"
             ></v-text-field>
-            <v-btn class="mx-3 mb-5" fab dark large depressed color="teal">
+            <v-btn
+                class="mx-3 mb-5"
+                fab
+                dark
+                large
+                depressed
+                color="teal"
+                @click="submitQuery">
                 <v-icon dark>mdi-magnify</v-icon>
             </v-btn>
         </v-row>
-        <h3>Results Length : {{ results.length }}</h3>
+        <v-alert
+            v-model="error"
+            v-if="errorMessage"
+            type="error"
+            text
+            outlined
+            dismissible
+        >
+            {{ errorMessage }}
+        </v-alert>
+        <v-row class="mt-10">
+            <h3 v-if="results.length">Results Length : {{ results.length }}</h3>
+        </v-row>
         <v-data-table
+            v-if="results.length"
             :headers="headers"
             :items="results"
-            :item-class= "row_class"
+            :item-class= "rowClass"
             :items-per-page="5"
             class="elevation-1"
         ></v-data-table>
@@ -23,41 +44,48 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     name: 'Home',
     data() {
         return {
-            input: '',
+            query: '',
+            error: false,
+            errorMessage: '',
             headers: [
                 { text: '유사도 점수', align: 'center', value: 'score' },
                 { text: '댓글 내용', align: 'center', sortable: false, value: 'comment' },
             ],
-            results: [
-                {
-                    score: 1.5423828,
-                    comment: '술 마시고 운전하면 좋아..',
-                },
-                {
-                    score: 0.8543997,
-                    comment: '음주운전 처벌해주세요',
-                },
-                {
-                    score: 0.8543997,
-                    comment: '음주운전 할 수도 있지..',
-                },
-                {
-                    score: 0.7641983,
-                    comment: '음주운전자는 현장에서 사살해야 된다.',
-                },
-            ],
+            results: [],
         }
     },
     methods: {
-        row_class(result) {
+        rowClass(result) {
             if (result.score >= 3) {
                 return 'orangered';
             }
-        }
+        },
+        submitQuery() {
+            if (!this.query.length) {
+                this.error = true;
+                this.errorMessage = '검색어를 입력해주세요.';
+                return;
+            }
+            this.error = false;
+            this.errorMessage = '';
+
+            const url = 'http://117.17.196.142:8888/search'; 
+            const data = this.query;
+
+            axios.post(url, data)
+            .then(res => {
+                console.log(res);
+            })
+            .catch(err => {
+                console.log(err);
+            })
+        },
     },
 }
 </script>
