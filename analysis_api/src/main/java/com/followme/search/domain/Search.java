@@ -9,20 +9,12 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class Search {
-    private int category;
-    private float grade_avg;
-    private String shopname;
-    private int likenum;
-    private String address;
-    private String photo;
+    private String comments;
+    private String comment_date;
 
-    public Search(int category,float grade_avg,String shopname,int likenum,String address,String photo){
-        this.shopname = shopname;
-        this.address=address;
-        this.category=category;
-        this.grade_avg=grade_avg;
-        this.likenum=likenum;
-        this.photo=photo;
+    public Search(String comments,String comment_date){
+        this.comments=comments;
+        this.comment_date=comment_date;
     }
 
     public Search() {

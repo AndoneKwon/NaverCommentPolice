@@ -14,7 +14,7 @@ public class SearchRequestDto {
 
     public SearchRequestDto(int from, String query){
         this.from = from;
-        this.size = 5;
+        this.size = 50;
         this.query = query;
     }
 }

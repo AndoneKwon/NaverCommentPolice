@@ -10,16 +10,7 @@ import lombok.Setter;
 @Setter
 public class SearchResponseDto {
 
-    private int category;
-    private float grade_avg;
-    private String menu;
-    private String shopname;
-    private int likenum;
-    private String address;
-    private String photo;
+    private String comment;
+    private String comment_date;
     private float score;
-
-
-
-
 }

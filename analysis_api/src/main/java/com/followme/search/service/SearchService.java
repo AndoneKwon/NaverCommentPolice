@@ -40,7 +40,7 @@ public class SearchService {
         Map<String,Object> result = new HashMap<>();
 
         QueryString queryString = new QueryString(target);
-        FullQuery fullQuery= new FullQuery(from,5,queryString);
+        FullQuery fullQuery= new FullQuery(from,queryString);
 
         String JsonData;
 
@@ -50,7 +50,7 @@ public class SearchService {
         final HttpEntity httpEntity = new NStringEntity(JsonData, ContentType.APPLICATION_JSON);
 
 
-        Request request = new Request("POST","/infos_table/_search");
+        Request request = new Request("POST","/comments/_search");
         request.addParameter("pretty","true");
         request.setEntity(httpEntity);
         Response response = elasticsearchConf.getRestClient().performRequest(request);
@@ -62,16 +62,11 @@ public class SearchService {
         JsonNode document2;
         document2=document.get("hits").get("hits");
         for(int i=0;i<document2.size();i++){
-            JsonNode mainPhoto = document2.get(i).get("_source").get("main_photo");
-            String photo = "photo"+mainPhoto.toString();
-            reList.add(new SearchResponseDto(document2.get(i).get("_source").get("category").asInt(),
-                    document2.get(i).get("_source").get("grade_avg").asInt(),
-                    document2.get(i).get("_source").get("menu").asText(),
-                    document2.get(i).get("_source").get("shopname").asText(),
-                    document2.get(i).get("_source").get("likenum").asInt(),
-                    document2.get(i).get("_source").get("address").asText(),
-                    photo,
-                    document2.get(i).get("_score").floatValue()));
+            reList.add(new SearchResponseDto(
+                    document2.get(i).get("_source").get("field").asText(),
+                    document2.get(i).get("_source").get("comment_at").asText(),
+                    document2.get(i).get("_score").floatValue()
+            ));
         }
 
 

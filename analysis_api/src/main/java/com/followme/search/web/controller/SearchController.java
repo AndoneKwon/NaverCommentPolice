@@ -27,37 +27,15 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
+@CrossOrigin(origins = "*")
 @AllArgsConstructor
 @RestController
 public class SearchController {
     private final SearchService searchService;
 
 
-
     @PostMapping("/search")
-    public @ResponseBody List<SearchResponseDto> search(@RequestHeader(value = "token") String token,
-                                                        @RequestBody SearchRequestDto searchRequestDto) throws IOException {
-
-        String secret = "asdfSFS34wfsdfsdfSDSD32dfsddDDerQSNCK34SOWEK5354fdgdf4";
-
-        Algorithm a = Algorithm.HMAC256(secret);
-        String jwt = JWT.create().withClaim("name","gogo").withClaim("age","30").sign(a);
-
-        JWTVerifier verifier = JWT.require(a)
-                .build();
-        try{
-            DecodedJWT decodedJWT = verifier.verify(jwt);
-        }catch (JWTVerificationException exception){
-
-        }
-
-        DecodedJWT decodedJWT = JWT.decode(jwt);
-        String ab = decodedJWT.getClaim("name").asString();
-        Claim age = decodedJWT.getClaim("age");
-
-
+    public @ResponseBody List<SearchResponseDto> search(@RequestBody SearchRequestDto searchRequestDto) throws IOException {
         return searchService.SearchDoc(searchRequestDto.getFrom(),searchRequestDto.getQuery());
     }
-
-
 }
