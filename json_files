@@ -211,3 +211,55 @@ curl -X GET "localhost:9200/index/_search?explain=true&pretty" -H 'Content-Type:
       }
     }
   }
+  -------
+  log table
+  
+  {
+  "settings": {
+    "number_of_shards": 1,
+    "analysis": {
+      "analyzer": {
+        "nori_analyzer": {
+          "tokenizer": "nori_my_dict_tokenizer"
+        },
+        "s_nori_analyzer": {
+          "tokenizer": "nori_my_dict_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "nori_my_dict_tokenizer": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "mixed"
+        }
+      },
+      "normalizer": {
+        "norm_low": {
+          "type": "custom",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "words": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "normalizer": "norm_low"
+          }
+        }
+      },
+      "gender": {
+        "type": "integer"
+      },
+      "age": {
+        "type": "integer"
+      }
+    }
+  }
+}
