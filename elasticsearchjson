@@ -1,3 +1,38 @@
+
+input{
+  jdbc{
+    jdbc_driver_library => "/lib/mysql-connector-java-8.0.18.jar"
+    jdbc_driver_class => "com.mysql.jdbc.Driver"
+    jdbc_connection_string => "jdbc:mysql://localhost:3306/capston?useUnicode=true&characterEncoding=utf-8&serverTim
+ezone=UTC"
+    jdbc_user => "root"
+    jdbc_password => "root"
+    tracking_column => "unix_ts"
+    use_column_value => true
+    tracking_column_type => "numeric"
+    statement => "SELECT title,contents, UNIX_TIMESTAMP(CREATEAT) AS unix_ts FROM board WHERE (UNIX_TIMESTAMP(CREATE
+AT) > :sql_last_value AND CREATEAT<NOW()) ORDER BY CREATEAT ASC"
+    schedule => "*/5 * * * *"
+  }
+}
+
+filter{
+  mutate{
+    copy => {"index" => "_id"}
+    remove_field => ["id"]
+  }
+}
+
+output{
+    elasticsearch{
+        hosts => "http://127.0.0.1:9200"
+        codec => "json"
+        index => "x_test"
+
+      }
+    }
+
+------------------
 {
     "settings": {
       "number_of_shards": 5,
