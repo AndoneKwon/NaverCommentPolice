@@ -1,0 +1,277 @@
+{
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1,
+      "analysis": {
+        "analyzer": {
+          "nori_analyzer": {
+            "tokenizer": "nori_my_dict_tokenizer"
+          }
+        },
+        "tokenizer": {
+          "nori_my_dict_tokenizer": {
+            "type": "nori_tokenizer",
+            "decompound_mode": "mixed"
+          }
+        }
+      }
+    },
+    "mappings": {
+      "properties": {
+        "test": {
+          "type": "text",
+          "analyzer": "nori_analyzer",
+          "search_analyzer": "nori_analyzer"
+        }
+      }
+    }
+  }
+
+
+{
+    "test": "곱창전골 팝니다"
+  }
+
+  {
+      "query":{
+          "term":{
+              "test":"곱창전골"
+          }
+      }
+  }
+
+
+  {
+    "tokenizer": "nori_my_dict_tokenizer",
+    "text": "곱창전골"
+  }
+
+
+  {
+    "settings": {
+      "number_of_shards": 5,
+      "number_of_replicas": 1,
+      "analysis": {
+        "analyzer": {
+          "nori_analyzer": {
+            "tokenizer": "nori_my_dict_tokenizer"
+          },
+          "search_analyzer_nori": {
+            "tokenizer": "nori_tokenizer"
+          }
+        },
+        "tokenizer": {
+          "nori_my_dict_tokenizer": {
+            "type": "nori_tokenizer",
+            "decompound_mode": "mixed"
+          },
+          "nori_tokenizer": {
+            "type": "nori_tokenizer",
+            "decompound_mode": "none"
+          }
+        }
+      }
+    },
+    "mappings": {
+      "properties": {
+        "test": {
+          "type": "text",
+          "analyzer": "nori_analyzer",
+          "search_analyzer": "search_analyzer_nori"
+        }
+      }
+    }
+  }
+
+
+  {
+    "query": {
+      "match": {
+        "test": {
+          "query": "곱창전골",
+          "analyzer": "nori_analyzer",
+          "operator": "and"
+        }
+      }
+    }
+  }
+
+  curl -X PUT "localhost:9200/index?pretty" -H 'Content-Type: application/json' -d'
+{
+  "settings": {
+    "number_of_shards": 1,
+    "similarity": {
+      "scripted_tfidf": {
+        "type": "scripted",
+        "script": {
+          "source": "double tf = Math.sqrt(doc.freq); double idf = Math.log((field.docCount+1.0)/(term.docFreq+1.0)) + 1.0; double norm = 1/Math.sqrt(doc.length); return query.boost * tf * idf * norm;"
+        }
+      }
+    },
+    "analysis": {
+        "analyzer": {
+          "nori_analyzer": {
+            "tokenizer": "nori_my_dict_tokenizer"
+          }
+        },
+        "tokenizer": {
+          "nori_my_dict_tokenizer": {
+            "type": "nori_tokenizer",
+            "decompound_mode": "mixed"
+          }
+        }
+      }
+  },
+  "mappings": {
+    "properties": {
+      "field": {
+        "type": "text",
+        "similarity": "scripted_tfidf",
+        "analyzer":"nori_analyzer"
+      }
+    }
+  }
+}
+'
+curl -X PUT "localhost:9200/index/_doc/1?pretty" -H 'Content-Type: application/json' -d'
+{
+  "field": "foo bar foo"
+}
+'
+curl -X PUT "localhost:9200/index/_doc/2?pretty" -H 'Content-Type: application/json' -d'
+{
+  "field": "bar baz"
+}
+'
+curl -X POST "localhost:9200/index/_refresh?pretty"
+curl -X GET "localhost:9200/index/_search?explain=true&pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "query_string": {
+      "query": "foo^1.7",
+      "default_field": "field"
+    }
+  }
+}
+'
+
+
+----------
+
+유사도 검색하는 index 생성
+
+{
+    "settings": {
+      "number_of_shards": 1,
+      "similarity": {
+        "scripted_tfidf": {
+          "type": "scripted",
+          "script": {
+            "source": "double tf = Math.sqrt(doc.freq); double idf = Math.log((field.docCount+1.0)/(term.docFreq+1.0)) + 1.0; double norm = 1/Math.sqrt(doc.length); return query.boost * tf * idf * norm;"
+          }
+        }
+      },
+      "analysis": {
+        "analyzer": {
+          "nori_analyzer": {
+            "tokenizer": "nori_my_dict_tokenizer"
+          },
+          "s_nori_analyzer": {
+            "tokenizer": "nori_my_dict_tokenizer"
+          }
+        },
+        "tokenizer": {
+          "nori_my_dict_tokenizer": {
+            "type": "nori_tokenizer",
+            "decompound_mode": "mixed"
+          }
+        }
+      }
+    },
+    "mappings": {
+      "properties": {
+        "field": {
+          "type": "text",
+          "similarity": "scripted_tfidf",
+          "analyzer": "nori_analyzer",
+          "search_analyzer": "s_nori_analyzer"
+        }
+      }
+    }
+  }
+
+  ---
+  검색 쿼리
+
+  {
+    "query": {
+      "query_string": {
+        "query": "foo^1.7",
+        "default_field": "field"
+      }
+    }
+  }
+  -------
+  log table
+  
+  {
+  "settings": {
+    "number_of_shards": 1,
+    "analysis": {
+      "analyzer": {
+        "nori_analyzer": {
+          "tokenizer": "nori_my_dict_tokenizer"
+        },
+        "s_nori_analyzer": {
+          "tokenizer": "nori_my_dict_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "nori_my_dict_tokenizer": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "mixed"
+        }
+      },
+      "normalizer": {
+        "norm_low": {
+          "type": "custom",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "words": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "normalizer": "norm_low"
+          }
+        }
+      },
+      "gender": {
+        "type": "integer"
+      },
+      "age": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+
+
+{
+  "query": {
+    "range": {
+      "searched_at": {
+        "lte": "1996-10-24"
+      }
+    }
+  }
+}
