@@ -9,4 +9,4 @@
 
 유사도를 가지는 댓글은 다른 색으로 표시 해 줍니다.
 
-https://user-images.githubusercontent.com/45382126/99761294-13306100-2b39-11eb-93e1-31b95ba10224.png
+![image](https://user-images.githubusercontent.com/45382126/99761294-13306100-2b39-11eb-93e1-31b95ba10224.png)
